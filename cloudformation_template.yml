@@ -111,9 +111,9 @@ Resources:
               - HEAD
             AllowedHeaders: 
               - "*"
-            ExposeHeaders: 
-              - "Access-Control-Allow-Origin"
-              - "x-amz-meta-customLabels"
+            # ExposeHeaders: 
+            #   - "Access-Control-Allow-Origin"
+            #   - "x-amz-meta-customLabels"
       VersioningConfiguration: 
         Status: Enabled
 
@@ -449,26 +449,26 @@ Resources:
 
 
 
-  OpenSearchServiceDomain:
-    Type: "AWS::OpenSearchService::Domain"
-    Properties:
-      DomainName: "photos2"
-      AccessPolicies:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              AWS: "*"
-            Action: "es:*"
-            Resource: "arn:aws:es:us-east-1:240279741812:domain/photos2/*"
-      ClusterConfig:
-        DedicatedMasterEnabled: "false"
-        InstanceCount: "1"
-        ZoneAwarenessEnabled: "false"
-        InstanceType: "t3.small.search"
-      EBSOptions:
-        EBSEnabled: true
-        Iops: 0
-        VolumeSize: 10
-        VolumeType: "gp2"
-      EngineVersion: 'OpenSearch_1.0'
+  # OpenSearchServiceDomain:
+  #   Type: "AWS::OpenSearchService::Domain"
+  #   Properties:
+  #     DomainName: "photos2"
+  #     AccessPolicies:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: "Allow"
+  #           Principal:
+  #             AWS: "*"
+  #           Action: "es:*"
+  #           Resource: "*"
+  #     ClusterConfig:
+  #       DedicatedMasterEnabled: "false"
+  #       InstanceCount: "1"
+  #       ZoneAwarenessEnabled: "false"
+  #       InstanceType: "t3.small.search"
+  #     EBSOptions:
+  #       EBSEnabled: true
+  #       Iops: 0
+  #       VolumeSize: 10
+  #       VolumeType: "gp2"
+  #     EngineVersion: 'OpenSearch_1.0'
