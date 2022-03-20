@@ -58,18 +58,81 @@ Resources:
 
   S3Photos:
     Type: "AWS::S3::Bucket"
+    # Name: photos-cloudformation
     Properties: 
       AccessControl: PublicRead
+      CorsConfiguration:
+        CorsRules:
+          -
+            AllowedOrigins: 
+              - "*"
+            AllowedMethods: 
+              - POST
+              - GET
+              - PUT
+              - DELETE
+              - HEAD
+            AllowedHeaders: 
+              - "*"
+
+  S3PhotosBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Photos
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - s3:*
+            Effect: Allow
+            Resource:
+              - !Sub arn:aws:s3:::${S3Photos}
+              - !Sub arn:aws:s3:::${S3Photos}/*
+            Principal:
+              - '*'
 
   S3Frontend:
     Type: "AWS::S3::Bucket"
+    # Name: front-end-b1-cloudformation
     Properties: 
       AccessControl: PublicRead
-      #BucketName: f2020-a3-static-website-host-bucket
       WebsiteConfiguration:
         IndexDocument: index.html
+      CorsConfiguration:
+        CorsRules:
+          -
+            AllowedOrigins: 
+              - "*"
+            AllowedMethods: 
+              - POST
+              - GET
+              - PUT
+              - DELETE
+              - HEAD
+            AllowedHeaders: 
+              - "*"
+            ExposeHeaders: 
+              - "Access-Control-Allow-Origin"
+              - "x-amz-meta-customLabels"
       VersioningConfiguration: 
         Status: Enabled
+
+  S3FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Frontend
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - s3:*
+            Effect: Allow
+            Resource:
+              - !Sub arn:aws:s3:::${S3Frontend}
+              - !Sub arn:aws:s3:::${S3Frontend}/*
+            Principal:
+              - '*'
+
 
   LFPipeline:
     Type: "AWS::CodePipeline::Pipeline"
@@ -191,8 +254,8 @@ Resources:
           description: "js5957"
           version: "1.0.0"
           title: "Photo Search Upload"
-        host: "c4s4uls62d.execute-api.us-east-1.amazonaws.com"
-        basePath: "/test"
+        # host: "c4s4uls62d.execute-api.us-east-1.amazonaws.com"
+        # basePath: "/test"
         schemes:
         - "https"
         paths:
@@ -389,7 +452,7 @@ Resources:
   OpenSearchServiceDomain:
     Type: "AWS::OpenSearchService::Domain"
     Properties:
-      DomainName: "photos1"
+      DomainName: "photos2"
       AccessPolicies:
         Version: "2012-10-17"
         Statement:
@@ -397,7 +460,7 @@ Resources:
             Principal:
               AWS: "*"
             Action: "es:*"
-            Resource: "arn:aws:es:us-east-1:240279741812:domain/photos1/*"
+            Resource: "arn:aws:es:us-east-1:240279741812:domain/photos2/*"
       ClusterConfig:
         DedicatedMasterEnabled: "false"
         InstanceCount: "1"
