@@ -10,7 +10,7 @@ Parameters:
 
   S3GHToken:
     Type: String
-    Default: ""
+    Default: "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"
 
   S3GHUser:
     Type: String
@@ -26,7 +26,7 @@ Parameters:
 
   LFGHToken:
     Type: String
-    Default: ""
+    Default: "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"
 
   LFGHUser:
     Type: String
