@@ -1,0 +1,411 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  S3GHRepo:
+    Type: String
+    Default: "PhotoAlbum"
+
+  S3GHBranch:
+    Type: String
+    Default: "front-end"
+
+  S3GHToken:
+    Type: String
+    Default: ""
+
+  S3GHUser:
+    Type: String
+    Default: "AllenJShi"
+
+  LFGHRepo:
+    Type: String
+    Default: "PhotoAlbum"
+
+  LFGHBranch:
+    Type: String
+    Default: "lambda"
+
+  LFGHToken:
+    Type: String
+    Default: ""
+
+  LFGHUser:
+    Type: String
+    Default: "AllenJShi"
+
+Resources:
+  AdminRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - cloudformation.amazonaws.com
+                - codepipeline.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Path: /
+      Policies:
+        - PolicyName: admin
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: "*"
+                Resource: "*"
+
+  S3Photos:
+    Type: "AWS::S3::Bucket"
+    Properties: 
+      AccessControl: PublicRead
+
+  S3Frontend:
+    Type: "AWS::S3::Bucket"
+    Properties: 
+      AccessControl: PublicRead
+      #BucketName: f2020-a3-static-website-host-bucket
+      WebsiteConfiguration:
+        IndexDocument: index.html
+      VersioningConfiguration: 
+        Status: Enabled
+
+  LFPipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      RoleArn: !GetAtt AdminRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref S3Photos
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: "1"
+              RunOrder: 1
+              Configuration:
+                Repo: !Ref LFGHRepo
+                Branch: !Ref LFGHBranch
+                OAuthToken: !Ref LFGHToken
+                Owner: !Ref LFGHUser
+                PollForSourceChanges: "true"
+              OutputArtifacts:
+                - Name: SourceArtifact
+              InputArtifacts: []
+              Region: "us-east-1"
+              Namespace: SourceVariables
+        - Name: Build
+          Actions:
+            - Name: Build
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              RunOrder: 1
+              Configuration:
+                ProjectName: "lambda-pipeline-build"
+              OutputArtifacts:
+                - Name: BuildArtifact
+              InputArtifacts:
+                - Name: SourceArtifact
+              Region: "us-east-1"
+              Namespace: BuildVariables
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: "1"
+              RunOrder: 1
+              Configuration:
+                ActionMode: CHANGE_SET_REPLACE
+                Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
+                ChangeSetName: "js-ChangeSet"
+                RoleArn: !GetAtt AdminRole.Arn
+                StackName: "js-stack"
+                TemplatePath: BuildArtifact::outputtemplate.yml
+              OutputArtifacts: []
+              InputArtifacts:
+                - Name: BuildArtifact
+              Region: us-east-1
+              Namespace: DeployVariables
+
+  S3Pipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      RoleArn: !GetAtt AdminRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref S3Photos
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              Configuration:
+                Repo: !Ref S3GHRepo
+                Owner: !Ref S3GHUser
+                Branch: !Ref S3GHBranch
+                OAuthToken: !Ref S3GHToken
+                PollForSourceChanges: "true"
+              OutputArtifacts:
+                - Name: SourceArtifact
+              RunOrder: 1
+
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: S3
+              Configuration:
+                BucketName: !Ref S3Frontend
+                Extract: true
+              InputArtifacts:
+                - Name: SourceArtifact
+              RunOrder: 1
+
+
+  RestAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: photo-search-upload
+      Description: api created via cloudformation
+      Body:
+        swagger: "2.0"
+        info:
+          description: "js5957"
+          version: "1.0.0"
+          title: "Photo Search Upload"
+        host: "c4s4uls62d.execute-api.us-east-1.amazonaws.com"
+        basePath: "/test"
+        schemes:
+        - "https"
+        paths:
+          /search:
+            get:
+              operationId: "searchPhotos"
+              produces:
+              - "application/json"
+              parameters:
+              - name: "Access-Control-Allow-Origin"
+                in: "header"
+                required: false
+                type: "string"
+              - name: "q"
+                in: "query"
+                required: false
+                type: "string"
+              responses:
+                "200":
+                  description: "200 response"
+                  schema:
+                    $ref: "#/definitions/SearchResponse"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                "500":
+                  description: "500 response"
+                  schema:
+                    $ref: "#/definitions/Error"
+                "403":
+                  description: "403 response"
+                  schema:
+                    $ref: "#/definitions/Error"
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:240279741812:function:search-photos/invocations"
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+                type: "aws_proxy"
+            options:
+              consumes:
+              - "application/json"
+              produces:
+              - "application/json"
+              parameters:
+              - name: "Access-Control-Allow-Origin"
+                in: "header"
+                required: false
+                type: "string"
+              responses:
+                "200":
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestTemplates:
+                  application/json: "{\"statusCode\": 200}"
+                passthroughBehavior: "when_no_match"
+                type: "mock"
+          /upload/{folder}/{item}:
+            put:
+              consumes:
+              - "image/jpeg"
+              - "image/png"
+              - "image/jpg"
+              produces:
+              - "application/json"
+              parameters:
+              - name: "item"
+                in: "path"
+                required: true
+                type: "string"
+              - name: "folder"
+                in: "path"
+                required: true
+                type: "string"
+              - name: "x-amz-meta-customLabels"
+                in: "header"
+                required: true
+                type: "string"
+              responses:
+                "200":
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    x-amz-meta-customLabels:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                credentials: "arn:aws:iam::240279741812:role/AmazonS3PhotoSearch"
+                httpMethod: "PUT"
+                uri: "arn:aws:apigateway:us-east-1:s3:path/{bucket}/{object}"
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestParameters:
+                  integration.request.path.object: "method.request.path.item"
+                  integration.request.header.x-amz-meta-customLabels: "method.request.header.x-amz-meta-customLabels"
+                  integration.request.path.bucket: "method.request.path.folder"
+                passthroughBehavior: "never"
+                contentHandling: "CONVERT_TO_BINARY"
+                type: "aws"
+            options:
+              consumes:
+              - "application/json"
+              produces:
+              - "application/json"
+              parameters:
+              - name: "x-amz-meta-customLabels"
+                in: "header"
+                required: false
+                type: "string"
+              - name: "folder"
+                in: "path"
+                required: true
+                type: "string"
+              - name: "item"
+                in: "path"
+                required: true
+                type: "string"
+              responses:
+                "200":
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS,PUT'"
+                      method.response.header.Access-Control-Allow-Headers: "'*'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestTemplates:
+                  application/json: "{\"statusCode\": 200}"
+                passthroughBehavior: "when_no_match"
+                type: "mock"
+        definitions:
+          Error:
+            type: "object"
+            properties:
+              code:
+                type: "integer"
+                format: "int32"
+              message:
+                type: "string"
+          Photo:
+            type: "object"
+            properties:
+              url:
+                type: "string"
+              labels:
+                type: "array"
+                items:
+                  type: "string"
+          SearchResponse:
+            type: "object"
+            properties:
+              results:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Photo"
+        x-amazon-apigateway-binary-media-types:
+        - "image/png"
+        - "image/jpeg"
+        - "image/jpg"
+
+
+
+  OpenSearchServiceDomain:
+    Type: "AWS::OpenSearchService::Domain"
+    Properties:
+      DomainName: "photos1"
+      AccessPolicies:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              AWS: "*"
+            Action: "es:*"
+            Resource: "arn:aws:es:us-east-1:240279741812:domain/photos1/*"
+      ClusterConfig:
+        DedicatedMasterEnabled: "false"
+        InstanceCount: "1"
+        ZoneAwarenessEnabled: "false"
+        InstanceType: "t3.small.search"
+      EBSOptions:
+        EBSEnabled: true
+        Iops: 0
+        VolumeSize: 10
+        VolumeType: "gp2"
+      EngineVersion: 'OpenSearch_1.0'

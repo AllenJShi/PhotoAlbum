@@ -1,0 +1,11 @@
+version: 0.1
+phases:
+  install:
+    commands:
+      - export BUCKET=photos-2402
+      - aws cloudformation package --template-file template.yml --s3-bucket $BUCKET --output-template-file packaged-template.yml
+artifacts:
+  type: zip
+  files:
+    - template.yml
+    - packaged-template.yml

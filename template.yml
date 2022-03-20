@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Lambda template 
+Resources:
+  photoBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: photo-2402
+
+  indexphotos:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      CodeUri: ./assets/lf1
+      Description: >-
+        An Amazon S3 trigger that retrieves metadata for the object that has
+        been updated.
+      MemorySize: 128
+      Timeout: 3
+      Role: 'arn:aws:iam::240279741812:role/service-role/LF1-index-photos'
+      Events:
+        S3Trigger:
+          Type: S3
+          Properties:
+            Bucket:
+              Ref: photoBucket
+            Events:
+              - 's3:ObjectCreated:Put'
+      Tags:
+        'lambda-console:blueprint': s3-get-object-python
+
+  searchphotos:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      CodeUri: ./assets/lf2
+      Description: 'search photos'
+      MemorySize: 128
+      Timeout: 3
+      Role: 'arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x'
+      Events:
+        ApiTrigger:
+          Type: Api
+          Properties:
+            Path: /search
+            Method: GET
+
