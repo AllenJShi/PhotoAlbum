@@ -6,7 +6,6 @@ from opensearchpy import OpenSearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 import requests
 
-# HERE WE ADD A LINE TO TEST
 ELASTIC_SEARCH_DOMAIN = 'search-photos1-4zwpjzi4fpqscem2wwpllgvl3a.us-east-1.es.amazonaws.com'
 PORT = 443  # HTTPS request
 INDEX = 'photos'
