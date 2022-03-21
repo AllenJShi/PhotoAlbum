@@ -5,7 +5,7 @@ Resources:
   photoBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: photos-2402
+      BucketName: photos-cf
 
   indexphotos:
     Type: 'AWS::Serverless::Function'

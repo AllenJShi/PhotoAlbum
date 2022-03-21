@@ -10,7 +10,7 @@ Parameters:
 
   S3GHToken:
     Type: String
-    Default: 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
+    Default: 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
 
   S3GHUser:
     Type: String
@@ -26,7 +26,7 @@ Parameters:
 
   LFGHToken:
     Type: String
-    Default: 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
+    Default: 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
 
   LFGHUser:
     Type: String
@@ -208,7 +208,7 @@ Resources:
                 Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
                 # ChangeSetName: "js-ChangeSet"
                 RoleArn: !GetAtt AdminRole.Arn
-                StackName: "lambdaStack"
+                StackName: "js-stack"
                 TemplatePath: BuildArtifact::packaged-template.yml
               OutputArtifacts: []
               InputArtifacts:
@@ -498,64 +498,40 @@ Resources:
       - RestApiDeployment
       - RestApi
 
-  OpenSearchServiceDomain:
-    # Type: "AWS::OpenSearchService::Domain"
-    # Properties:
-    #   DomainName: "photos-cf"
-    #   AccessPolicies:
-    #     Version: "2012-10-17"
-    #     Statement:
-    #       - Effect: "Allow"
-    #         Principal:
-    #           AWS: "*"
-    #         Action: "es:*"
-    #         Resource: "*"
-    #   ClusterConfig:
-    #     DedicatedMasterEnabled: "false"
-    #     InstanceCount: "1"
-    #     ZoneAwarenessEnabled: "false"
-    #     InstanceType: "t3.small.search"
-    #   EBSOptions:
-    #     EBSEnabled: true
-    #     Iops: 0
-    #     VolumeSize: 10
-    #     VolumeType: "gp2"
-    #   EngineVersion: 'OpenSearch_1.0'
-# Refer to https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-opensearchservice-domain.html
-    Type: AWS::OpenSearchService::Domain
-    Properties: 
-      DomainName:
-        Ref: OpenSearchDomain
-      EngineVersion: 'OpenSearch_1.0'
-      AdvancedSecurityOptions:
-        Enabled: true
-        InternalUserDatabaseEnabled: false
-        MasterUserOptions:
-          MasterUserARN: 
-            - arn:aws:iam::240279741812:role/service-role/LF1-index-photos
-            - arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x
-      NodeToNodeEncryptionOptions: 
-        Enabled: true
-      DomainEndpointOptions:
-        EnforceHTTPS: true
-      EncryptionAtRestOptions:
-        Enabled: true
-        KmsKeyId: 59a25232-9969-4e31-b7c6-ab80147e51ca
-      AccessPolicies: 
-        Version: '2012-10-17'
-        Statement:
-          - Effect: 'Allow'
-            Principal: '*'
-            Action: 'es:*'
-            Resource: !Sub 'arn:aws:es:us-east-1:240279741812:domain/${OpenSearchDomain}/*'
-      ClusterConfig: 
-        DedicatedMasterEnabled: false
-        InstanceCount: '1'
-        ZoneAwarenessEnabled: false
-        InstanceType: 't3.small.search'
-      EBSOptions:
-        EBSEnabled: true
-        Iops: '0'
-        VolumeSize: '10'
-        VolumeType: 'gp2'
+  # OpenSearchServiceDomain:
+  #   Type: AWS::OpenSearchService::Domain
+  #   Properties: 
+  #     DomainName:
+  #       Ref: OpenSearchDomain
+  #     EngineVersion: 'OpenSearch_1.0'
+  #     AdvancedSecurityOptions:
+  #       Enabled: true
+  #       InternalUserDatabaseEnabled: false
+  #       MasterUserOptions:
+  #         MasterUserARN: "arn:aws:iam::240279741812:role/service-role/LF1-index-photos,arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x"
+  #     NodeToNodeEncryptionOptions: 
+  #       Enabled: true
+  #     DomainEndpointOptions:
+  #       EnforceHTTPS: true
+  #     EncryptionAtRestOptions:
+  #       Enabled: true
+  #       KmsKeyId: 59a25232-9969-4e31-b7c6-ab80147e51ca
+  #     AccessPolicies: 
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Effect: 'Allow'
+  #           Principal: '*'
+  #           Action: 'es:*'
+  #           Resource: !Sub 'arn:aws:es:us-east-1:240279741812:domain/${OpenSearchDomain}/*'
+  #     ClusterConfig: 
+  #       DedicatedMasterEnabled: false
+  #       InstanceCount: '1'
+  #       ZoneAwarenessEnabled: false
+  #       InstanceType: 't3.small.search'
+  #     EBSOptions:
+  #       EBSEnabled: true
+  #       Iops: '0'
+  #       VolumeSize: '10'
+  #       VolumeType: 'gp2'
 
+# Refer to https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-opensearchservice-domain.html
