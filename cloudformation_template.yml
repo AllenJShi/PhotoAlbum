@@ -276,7 +276,7 @@ Resources:
               RunOrder: 1
 
 
-  RestAPI:
+  RestApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
       Name: photo-search-upload
