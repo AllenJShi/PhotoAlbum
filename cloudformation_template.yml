@@ -527,8 +527,8 @@ Resources:
       DomainName:
         Ref: OpenSearchDomain
       EngineVersion: 'OpenSearch_1.0'
-      AdvancedSecurityOptions:
-        Enabled: true
+      # AdvancedSecurityOptions:
+      #   Enabled: true
       AccessPolicies: 
         Version: '2012-10-17'
         Statement:
