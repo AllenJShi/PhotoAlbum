@@ -527,11 +527,12 @@ Resources:
       DomainName:
         Ref: OpenSearchDomain
       EngineVersion: 'OpenSearch_1.0'
+      AdvancedSecurityOptions:
+        Enabled: true
       AccessPolicies: 
         Version: '2012-10-17'
         Statement:
-          -
-            Effect: 'Allow'
+          - Effect: 'Allow'
             Principal:
               AWS: '*'
             Action: 'es:*'
@@ -546,6 +547,4 @@ Resources:
         Iops: '0'
         VolumeSize: '10'
         VolumeType: 'gp2'
-      # LogPublishingOptions: 
-      #   Key : Value
 
