@@ -2,35 +2,39 @@ AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   S3GHRepo:
     Type: String
-    Default: "PhotoAlbum"
+    Default: PhotoAlbum
 
   S3GHBranch:
     Type: String
-    Default: "front-end"
+    Default: front-end
 
   S3GHToken:
     Type: String
-    Default: "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"
+    Default: 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
 
   S3GHUser:
     Type: String
-    Default: "AllenJShi"
+    Default: AllenJShi
 
   LFGHRepo:
     Type: String
-    Default: "PhotoAlbum"
+    Default: PhotoAlbum
 
   LFGHBranch:
     Type: String
-    Default: "lambda"
+    Default: lambda
 
   LFGHToken:
     Type: String
-    Default: "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"
+    Default: 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
 
   LFGHUser:
     Type: String
-    Default: "AllenJShi"
+    Default: AllenJShi
+  
+  OpenSearchDomain:
+    Type: String
+    Default: photos-cf
 
 Resources:
   AdminRole:
@@ -162,14 +166,10 @@ Resources:
                 Version: 1
               RunOrder: 1
               Configuration:
-                # Repo: !Ref LFGHRepo
-                # Branch: !Ref LFGHBranch
-                # OAuthToken: !Ref LFGHToken
-                # Owner: !Ref LFGHUser
-                Repo: PhotoAlbum
-                Branch: lambda
-                OAuthToken: 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
-                Owner: AllenJShi
+                Repo: !Ref LFGHRepo
+                Branch: !Ref LFGHBranch
+                OAuthToken: !Ref LFGHToken
+                Owner: !Ref LFGHUser
                 PollForSourceChanges: "true"
               OutputArtifacts:
                 - Name: SourceArtifact
@@ -203,11 +203,12 @@ Resources:
                 Version: "1"
               RunOrder: 1
               Configuration:
-                ActionMode: CHANGE_SET_REPLACE
+                # ActionMode: CHANGE_SET_REPLACE
+                ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
-                ChangeSetName: "js-ChangeSet"
+                # ChangeSetName: "js-ChangeSet"
                 RoleArn: !GetAtt AdminRole.Arn
-                StackName: "js-stack"
+                StackName: "lambdaStack"
                 TemplatePath: BuildArtifact::packaged-template.yml
               OutputArtifacts: []
               InputArtifacts:
@@ -215,23 +216,23 @@ Resources:
               Region: us-east-1
               Namespace: DeployVariables
 
-            - Name: Execute
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Provider: CloudFormation
-                Version: "1"
-              RunOrder: 1
-              Configuration:
-                ActionMode: CHANGE_SET_EXECUTE
-                Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
-                ChangeSetName: "js-ChangeSet"
-                RoleArn: !GetAtt AdminRole.Arn
-                StackName: "js-stack"
-              OutputArtifacts: []
-              InputArtifacts: []
-              Region: us-east-1
-              Namespace: ExecuteVariables
+            # - Name: Execute
+            #   ActionTypeId:
+            #     Category: Deploy
+            #     Owner: AWS
+            #     Provider: CloudFormation
+            #     Version: "1"
+            #   RunOrder: 1
+            #   Configuration:
+            #     ActionMode: CHANGE_SET_EXECUTE
+            #     Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
+            #     ChangeSetName: "js-ChangeSet"
+            #     RoleArn: !GetAtt AdminRole.Arn
+            #     StackName: "js-stack"
+            #   OutputArtifacts: []
+            #   InputArtifacts: []
+            #   Region: us-east-1
+            #   Namespace: ExecuteVariables
 
 
   S3Pipeline:
@@ -251,14 +252,10 @@ Resources:
                 Version: 1
                 Provider: GitHub
               Configuration:
-                # Repo: !Ref S3GHRepo
-                # Owner: !Ref S3GHUser
-                # Branch: !Ref S3GHBranch
-                # OAuthToken: !Ref S3GHToken
-                Repo: PhotoAlbum
-                Branch: front-end
-                OAuthToken: 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
-                Owner: AllenJShi
+                Repo: !Ref S3GHRepo
+                Owner: !Ref S3GHUser
+                Branch: !Ref S3GHBranch
+                OAuthToken: !Ref S3GHToken
                 PollForSourceChanges: "true"
               OutputArtifacts:
                 - Name: SourceArtifact
@@ -291,7 +288,7 @@ Resources:
           version: "1.0.0"
           title: "Photo Search Upload"
         # host: "c4s4uls62d.execute-api.us-east-1.amazonaws.com"
-        basePath: "/test"
+        # basePath: "/test"
         schemes:
         - "https"
         paths:
@@ -484,27 +481,71 @@ Resources:
         - "image/jpg"
 
 
+  RestApiDeployment:
+      Type: AWS::ApiGateway::Deployment
+      Properties: 
+        RestApiId: !Ref RestApi
+        Description: "API deployment toward test stage"
+      DependsOn: RestApi
 
-  # OpenSearchServiceDomain:
-  #   Type: "AWS::OpenSearchService::Domain"
-  #   Properties:
-  #     DomainName: "photos-cf"
-  #     AccessPolicies:
-  #       Version: "2012-10-17"
-  #       Statement:
-  #         - Effect: "Allow"
-  #           Principal:
-  #             AWS: "*"
-  #           Action: "es:*"
-  #           Resource: "*"
-  #     ClusterConfig:
-  #       DedicatedMasterEnabled: "false"
-  #       InstanceCount: "1"
-  #       ZoneAwarenessEnabled: "false"
-  #       InstanceType: "t3.small.search"
-  #     EBSOptions:
-  #       EBSEnabled: true
-  #       Iops: 0
-  #       VolumeSize: 10
-  #       VolumeType: "gp2"
-  #     EngineVersion: 'OpenSearch_1.0'
+  RestApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: 'test'
+      RestApiId: !Ref RestApi
+      DeploymentId: !Ref RestApiDeployment
+    DependsOn:
+      - RestApiDeployment
+      - RestApi
+
+  OpenSearchServiceDomain:
+    # Type: "AWS::OpenSearchService::Domain"
+    # Properties:
+    #   DomainName: "photos-cf"
+    #   AccessPolicies:
+    #     Version: "2012-10-17"
+    #     Statement:
+    #       - Effect: "Allow"
+    #         Principal:
+    #           AWS: "*"
+    #         Action: "es:*"
+    #         Resource: "*"
+    #   ClusterConfig:
+    #     DedicatedMasterEnabled: "false"
+    #     InstanceCount: "1"
+    #     ZoneAwarenessEnabled: "false"
+    #     InstanceType: "t3.small.search"
+    #   EBSOptions:
+    #     EBSEnabled: true
+    #     Iops: 0
+    #     VolumeSize: 10
+    #     VolumeType: "gp2"
+    #   EngineVersion: 'OpenSearch_1.0'
+# Refer to https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-opensearchservice-domain.html
+    Type: AWS::OpenSearchService::Domain
+    Properties: 
+      DomainName:
+        Ref: OpenSearchDomain
+      EngineVersion: 'OpenSearch_1.0'
+      AccessPolicies: 
+        Version: '2012-10-17'
+        Statement:
+          -
+            Effect: 'Allow'
+            Principal:
+              AWS: '*'
+            Action: 'es:*'
+            Resource: !Sub 'arn:aws:es:us-east-1:240279741812:domain/${OpenSearchDomain}/*'
+      ClusterConfig: 
+        DedicatedMasterEnabled: false
+        InstanceCount: '1'
+        ZoneAwarenessEnabled: false
+        InstanceType: 't3.small.search'
+      EBSOptions:
+        EBSEnabled: true
+        Iops: '0'
+        VolumeSize: '10'
+        VolumeType: 'gp2'
+      # LogPublishingOptions: 
+      #   Key : Value
+

@@ -2,7 +2,7 @@ version: 0.1
 phases:
   install:
     commands:
-      - aws cloudformation package --template-file template.yml --s3-bucket photos-2402 --output-template-file packaged-template.yml
+      - aws cloudformation package --template-file template.yml --s3-bucket cf-templates-1tg60j4bhe7g6-us-east-1 --output-template-file packaged-template.yml
 artifacts:
   type: zip
   files:
