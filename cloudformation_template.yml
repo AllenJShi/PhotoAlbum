@@ -174,7 +174,7 @@ Resources:
               OutputArtifacts:
                 - Name: SourceArtifact
               InputArtifacts: []
-              # Region: "us-east-1"
+              Region: "us-east-1"
               Namespace: SourceVariables
         - Name: Build
           Actions:
@@ -191,7 +191,7 @@ Resources:
                 - Name: BuildArtifact
               InputArtifacts:
                 - Name: SourceArtifact
-              # Region: "us-east-1"
+              Region: "us-east-1"
               Namespace: BuildVariables
         - Name: Deploy
           Actions:
@@ -212,8 +212,27 @@ Resources:
               OutputArtifacts: []
               InputArtifacts:
                 - Name: BuildArtifact
-              # Region: us-east-1
+              Region: us-east-1
               Namespace: DeployVariables
+
+            - Name: Execute
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: "1"
+              RunOrder: 1
+              Configuration:
+                ActionMode: CHANGE_SET_EXECUTE
+                Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
+                ChangeSetName: "js-ChangeSet"
+                RoleArn: !GetAtt AdminRole.Arn
+                StackName: "js-stack"
+              OutputArtifacts: []
+              InputArtifacts: []
+              Region: us-east-1
+              Namespace: ExecuteVariables
+
 
   S3Pipeline:
     Type: "AWS::CodePipeline::Pipeline"
@@ -469,7 +488,7 @@ Resources:
   # OpenSearchServiceDomain:
   #   Type: "AWS::OpenSearchService::Domain"
   #   Properties:
-  #     DomainName: "photos2"
+  #     DomainName: "photos-cf"
   #     AccessPolicies:
   #       Version: "2012-10-17"
   #       Statement:
