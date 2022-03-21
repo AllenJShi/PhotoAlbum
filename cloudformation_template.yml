@@ -534,7 +534,7 @@ Resources:
         Statement:
           - Effect: 'Allow'
             Principal:
-              AWS: '*'
+              AWS: 'arn:aws:iam::240279741812:role/*'
             Action: 'es:*'
             Resource: !Sub 'arn:aws:es:us-east-1:240279741812:domain/${OpenSearchDomain}/*'
       ClusterConfig: 
