@@ -527,14 +527,25 @@ Resources:
       DomainName:
         Ref: OpenSearchDomain
       EngineVersion: 'OpenSearch_1.0'
-      # AdvancedSecurityOptions:
-      #   Enabled: true
+      AdvancedSecurityOptions:
+        Enabled: true
+        InternalUserDatabaseEnabled: false
+        MasterUserOptions:
+          MasterUserARN: 
+            - arn:aws:iam::240279741812:role/service-role/LF1-index-photos
+            - arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x
+      NodeToNodeEncryptionOptions: 
+        Enabled: true
+      DomainEndpointOptions:
+        EnforceHTTPS: true
+      EncryptionAtRestOptions:
+        Enabled: true
+        KmsKeyId: 59a25232-9969-4e31-b7c6-ab80147e51ca
       AccessPolicies: 
         Version: '2012-10-17'
         Statement:
           - Effect: 'Allow'
-            Principal:
-              AWS: 'arn:aws:iam::240279741812:role/*'
+            Principal: '*'
             Action: 'es:*'
             Resource: !Sub 'arn:aws:es:us-east-1:240279741812:domain/${OpenSearchDomain}/*'
       ClusterConfig: 
