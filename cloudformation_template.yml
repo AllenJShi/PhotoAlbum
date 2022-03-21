@@ -10,7 +10,7 @@ Parameters:
 
   S3GHToken:
     Type: String
-    Default: "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"
+    Default: "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"
 
   S3GHUser:
     Type: String
@@ -26,7 +26,7 @@ Parameters:
 
   LFGHToken:
     Type: String
-    Default: "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"
+    Default: "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"
 
   LFGHUser:
     Type: String
@@ -80,16 +80,21 @@ Resources:
     Properties:
       Bucket: !Ref S3Photos
       PolicyDocument:
+        Id: PublicWebsitePolicy
+        Version: 2012-10-17
         Statement:
-          -
-            Action:
-              - s3:*
+          - Sid: S3PhotosBucketPolicy
+            Action: 's3:*'
             Effect: Allow
-            Resource:
-              - !Sub arn:aws:s3:::${S3Photos}
-              - !Sub arn:aws:s3:::${S3Photos}/*
-            Principal:
-              - '*'
+            # Resource:
+            #   - !Sub arn:aws:s3:::${S3Photos}
+            #   - !Sub arn:aws:s3:::${S3Photos}/*
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref S3Photos
+                - /*
+            Principal: '*'
 
   S3Frontend:
     Type: "AWS::S3::Bucket"
@@ -114,24 +119,29 @@ Resources:
             # ExposeHeaders: 
             #   - "Access-Control-Allow-Origin"
             #   - "x-amz-meta-customLabels"
-      VersioningConfiguration: 
-        Status: Enabled
+      # VersioningConfiguration: 
+      #   Status: Enabled
 
   S3FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket: !Ref S3Frontend
       PolicyDocument:
+        Id: PublicWebsitePolicy
+        Version: 2012-10-17
         Statement:
-          -
-            Action:
-              - s3:*
+          - Sid: S3FrontendBucketPolicy
+            Action: 's3:*'
             Effect: Allow
-            Resource:
-              - !Sub arn:aws:s3:::${S3Frontend}
-              - !Sub arn:aws:s3:::${S3Frontend}/*
-            Principal:
-              - '*'
+            # Resource:
+            #   - !Sub arn:aws:s3:::${S3Frontend}
+            #   - !Sub arn:aws:s3:::${S3Frontend}/*
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref S3Frontend
+                - /*
+            Principal: '*'
 
 
   LFPipeline:
@@ -149,18 +159,22 @@ Resources:
                 Category: Source
                 Owner: ThirdParty
                 Provider: GitHub
-                Version: "1"
+                Version: 1
               RunOrder: 1
               Configuration:
-                Repo: !Ref LFGHRepo
-                Branch: !Ref LFGHBranch
-                OAuthToken: !Ref LFGHToken
-                Owner: !Ref LFGHUser
+                # Repo: !Ref LFGHRepo
+                # Branch: !Ref LFGHBranch
+                # OAuthToken: !Ref LFGHToken
+                # Owner: !Ref LFGHUser
+                Repo: PhotoAlbum
+                Branch: lambda
+                OAuthToken: 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
+                Owner: AllenJShi
                 PollForSourceChanges: "true"
               OutputArtifacts:
                 - Name: SourceArtifact
               InputArtifacts: []
-              Region: "us-east-1"
+              # Region: "us-east-1"
               Namespace: SourceVariables
         - Name: Build
           Actions:
@@ -169,15 +183,15 @@ Resources:
                 Category: Build
                 Owner: AWS
                 Provider: CodeBuild
-                Version: "1"
+                Version: 1
               RunOrder: 1
               Configuration:
-                ProjectName: "lambda-pipeline-build"
+                ProjectName: "lambda-codebuild"
               OutputArtifacts:
                 - Name: BuildArtifact
               InputArtifacts:
                 - Name: SourceArtifact
-              Region: "us-east-1"
+              # Region: "us-east-1"
               Namespace: BuildVariables
         - Name: Deploy
           Actions:
@@ -194,11 +208,11 @@ Resources:
                 ChangeSetName: "js-ChangeSet"
                 RoleArn: !GetAtt AdminRole.Arn
                 StackName: "js-stack"
-                TemplatePath: BuildArtifact::outputtemplate.yml
+                TemplatePath: BuildArtifact::packaged-template.yml
               OutputArtifacts: []
               InputArtifacts:
                 - Name: BuildArtifact
-              Region: us-east-1
+              # Region: us-east-1
               Namespace: DeployVariables
 
   S3Pipeline:
@@ -218,15 +232,18 @@ Resources:
                 Version: 1
                 Provider: GitHub
               Configuration:
-                Repo: !Ref S3GHRepo
-                Owner: !Ref S3GHUser
-                Branch: !Ref S3GHBranch
-                OAuthToken: !Ref S3GHToken
+                # Repo: !Ref S3GHRepo
+                # Owner: !Ref S3GHUser
+                # Branch: !Ref S3GHBranch
+                # OAuthToken: !Ref S3GHToken
+                Repo: PhotoAlbum
+                Branch: front-end
+                OAuthToken: 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
+                Owner: AllenJShi
                 PollForSourceChanges: "true"
               OutputArtifacts:
                 - Name: SourceArtifact
               RunOrder: 1
-
         - Name: Deploy
           Actions:
             - Name: Deploy
@@ -255,7 +272,7 @@ Resources:
           version: "1.0.0"
           title: "Photo Search Upload"
         # host: "c4s4uls62d.execute-api.us-east-1.amazonaws.com"
-        # basePath: "/test"
+        basePath: "/test"
         schemes:
         - "https"
         paths:
