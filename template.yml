@@ -86,7 +86,7 @@ Resources:
             }]
         }
       Policies: |
-        [ {
+        {
             "Version": "2012-10-17",
             "Statement": [
                 {
@@ -103,12 +103,7 @@ Resources:
                     "Resource": [
                         "arn:aws:logs:us-east-1:240279741812:log-group:/aws/lambda/search-photos-cf:*"
                     ]
-                }
-            ]
-        },
-        {
-            "Version": "2012-10-17",
-            "Statement": [
+                },
                 {
                     "Effect": "Allow",
                     "Action": [
@@ -116,12 +111,7 @@ Resources:
                         "s3-object-lambda:*"
                     ],
                     "Resource": "*"
-                }
-            ]
-        }, 
-        {
-            "Version": "2012-10-17",
-            "Statement": [
+                },
                 {
                     "Effect": "Allow",
                     "Action": [
@@ -286,12 +276,7 @@ Resources:
                             ]
                         }
                     }
-                }
-            ]
-        },
-        {
-            "Version": "2012-10-17",
-            "Statement": [
+                },
                 {
                     "Effect": "Allow",
                     "Action": [
@@ -300,8 +285,8 @@ Resources:
                     "Resource": "*"
                 }
             ]
-        } ]
-        
+        },
+
 
   searchphotos:
     Type: 'AWS::Serverless::Function'
