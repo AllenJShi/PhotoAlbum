@@ -69,12 +69,10 @@ Resources:
       Principal: s3.amazonaws.com
       SourceAccount: !Ref 'AWS::AccountId'
       SourceArn: !GetAtt S3Photos.Arn
-
-
+  
   searchphotosRole:
     Type: AWS::IAM::Role
-    Properties: 
-      Description: allow search lambda to access s3, lex, opensearch
+    Properties:
       AssumeRolePolicyDocument: |
         {
             "Statement": [{
@@ -83,6 +81,27 @@ Resources:
                 "Action": [ "sts:AssumeRole" ]
             }]
         }
+        
+  indexphotosRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: |
+        {
+            "Statement": [{
+                "Effect": "Allow",
+                "Principal": { "Service": [ "codebuild.amazonaws.com" ]},
+                "Action": [ "sts:AssumeRole" ]
+            }]
+        }
+
+  LambdaRolePolicies:
+    Type: AWS::IAM::Policy
+    Properties: 
+      Description: allow search lambda to access s3, lex, opensearch
+      PolicyName: all-lambda-role
+      Roles: 
+        - Ref: searchphotosRole
+        - Ref: indexphotosRole
       PolicyDocument: |
         {
             "Version": "2012-10-17",
