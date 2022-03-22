@@ -97,6 +97,7 @@ Resources:
         Service:
           - apigateway.amazonaws.com
           - lex.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
 
 
 
