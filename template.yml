@@ -70,6 +70,37 @@ Resources:
       SourceAccount: !Ref 'AWS::AccountId'
       SourceArn: !GetAtt S3Photos.Arn
   
+
+  searchphotos:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: search-photos-cf
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      CodeUri: ./assets/lf2
+      Description: 'search photos'
+      MemorySize: 128
+      Timeout: 3
+      Role: 'arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x'
+      Events:
+        ApiTrigger:
+          Type: Api
+          Properties:
+            Path: /search
+            Method: GET
+
+  searchphotosPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt searchphotos.Arn
+      Effect: Allow
+      Action: lambda:InvokeFunction
+      Principal: 
+        - apigateway.amazonaws.com
+        - lex.amazonaws.com
+
+
+
 #   searchphotosRole:
 #     Type: AWS::IAM::Role
 #     Properties:
@@ -285,33 +316,3 @@ Resources:
 #                     }
 #                 ]
 #             }
-
-
-  searchphotos:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      FunctionName: search-photos-cf
-      Handler: lambda_function.lambda_handler
-      Runtime: python3.7
-      CodeUri: ./assets/lf2
-      Description: 'search photos'
-      MemorySize: 128
-      Timeout: 3
-      Role: 'arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x'
-    #   Role: !Ref searchphotosRole
-      Events:
-        ApiTrigger:
-          Type: Api
-          Properties:
-            Path: /search
-            Method: GET
-
-  searchphotosPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt searchphotos.Arn
-      Effect: Allow
-      Action: lambda:InvokeFunction
-      Principal: 
-        - apigateway.amazonaws.com
-        - lex.amazonaws.com
