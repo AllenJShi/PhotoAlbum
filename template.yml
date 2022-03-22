@@ -88,13 +88,21 @@ Resources:
             Path: /search
             Method: GET
 
-  searchphotosPermission:
+  searchphotosApiPermission:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !GetAtt searchphotos.Arn
       Action: lambda:InvokeFunction
-      Principal: '*'
+      Principal: apigateway.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
 
+  searchphotosLexPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt searchphotos.Arn
+      Action: lambda:InvokeFunction
+      Principal: lex.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
 
 
 #   searchphotosRole:
