@@ -36,6 +36,10 @@ Parameters:
     Type: String
     Default: photos-cf
 
+  searchphotosName:
+    Type: String
+    Default: search-photos-cf
+
 Resources:
   AdminRole:
     Type: "AWS::IAM::Role"
@@ -275,14 +279,12 @@ Resources:
             #   Namespace: ExecuteVariables
 
 
-
-
   RestApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
       Name: photo-search-upload
       Description: api created via cloudformation
-      Body:
+      Body: !Sub |
         swagger: "2.0"
         info:
           description: "js5957"
@@ -325,7 +327,7 @@ Resources:
                     $ref: "#/definitions/Error"
               x-amazon-apigateway-integration:
                 httpMethod: "POST"
-                uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:240279741812:function:search-photos/invocations"
+                uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:240279741812:function:${searchphotosName}/invocations"
                 responses:
                   default:
                     statusCode: "200"
