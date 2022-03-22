@@ -10,7 +10,7 @@ Parameters:
 
   S3GHToken:
     Type: String
-    Default: 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
+    Default: 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
 
   S3GHUser:
     Type: String
@@ -26,7 +26,7 @@ Parameters:
 
   LFGHToken:
     Type: String
-    Default: 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
+    Default: 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
 
   LFGHUser:
     Type: String
@@ -97,6 +97,53 @@ Resources:
   #               - !Ref S3Photos
   #               - /*
   #           Principal: '*'
+
+  S3Frontend:
+    Type: "AWS::S3::Bucket"
+    Properties: 
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+      CorsConfiguration:
+        CorsRules:
+          -
+            AllowedOrigins: 
+              - "*"
+            AllowedMethods: 
+              - POST
+              - GET
+              - PUT
+              - DELETE
+              - HEAD
+            AllowedHeaders: 
+              - "*"
+            # ExposeHeaders: 
+            #   - "Access-Control-Allow-Origin"
+            #   - "x-amz-meta-customLabels"
+      # VersioningConfiguration: 
+      #   Status: Enabled
+
+  S3FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Frontend
+      PolicyDocument:
+        Id: PublicWebsitePolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: S3FrontendBucketPolicy
+            Action: 's3:*'
+            Effect: Allow
+            # Resource:
+            #   - !Sub arn:aws:s3:::${S3Frontend}
+            #   - !Sub arn:aws:s3:::${S3Frontend}/*
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref S3Frontend
+                - /*
+            Principal: '*'
+
 
   S3Pipeline:
     Type: "AWS::CodePipeline::Pipeline"
