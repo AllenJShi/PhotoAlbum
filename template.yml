@@ -23,8 +23,6 @@ Resources:
   S3PhotosBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-    # NOTE: create role, not sure if it works, this expect to allow the s3 bucket trigger index lambda lf1
-      RoleArn: !GetAtt AdminRole.Arn
       Bucket: !Ref S3Photos
       PolicyDocument:
         Id: PublicWebsitePolicy
@@ -75,6 +73,236 @@ Resources:
       SourceArn: !GetAtt S3Photos.Arn
 
 
+  searchphotosRole:
+    Type: AWS::IAM::Role
+    AssumeRolePolicyDocument: |
+      {
+          "Statement": [{
+              "Effect": "Allow",
+              "Principal": { "Service": [ "codebuild.amazonaws.com" ]},
+              "Action": [ "sts:AssumeRole" ]
+          }]
+      }
+    Properties: 
+      Description: allow search lambda to access s3, lex, opensearch
+      Policies: !Sub |
+        [ {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": "logs:CreateLogGroup",
+                    "Resource": "arn:aws:logs:us-east-1:240279741812:*"
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "logs:CreateLogStream",
+                        "logs:PutLogEvents"
+                    ],
+                    "Resource": [
+                        "arn:aws:logs:us-east-1:240279741812:log-group:/aws/lambda/${searchphotos.Arn}:*"
+                    ]
+                }
+            ]
+        },
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:*",
+                        "s3-object-lambda:*"
+                    ],
+                    "Resource": "*"
+                }
+            ]
+        }, 
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "cloudwatch:GetMetricStatistics",
+                        "cloudwatch:DescribeAlarms",
+                        "cloudwatch:DescribeAlarmsForMetric",
+                        "kms:DescribeKey",
+                        "kms:ListAliases",
+                        "lambda:GetPolicy",
+                        "lambda:ListFunctions",
+                        "lex:*",
+                        "polly:DescribeVoices",
+                        "polly:SynthesizeSpeech",
+                        "kendra:ListIndices",
+                        "iam:ListRoles",
+                        "s3:ListAllMyBuckets",
+                        "logs:DescribeLogGroups",
+                        "s3:GetBucketLocation"
+                    ],
+                    "Resource": [
+                        "*"
+                    ]
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "lambda:AddPermission",
+                        "lambda:RemovePermission"
+                    ],
+                    "Resource": "arn:aws:lambda:*:*:function:AmazonLex*",
+                    "Condition": {
+                        "StringEquals": {
+                            "lambda:Principal": "lex.amazonaws.com"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "iam:GetRole"
+                    ],
+                    "Resource": [
+                        "arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots",
+                        "arn:aws:iam::*:role/aws-service-role/channels.lex.amazonaws.com/AWSServiceRoleForLexChannels",
+                        "arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*",
+                        "arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*"
+                    ]
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "iam:CreateServiceLinkedRole"
+                    ],
+                    "Resource": [
+                        "arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots"
+                    ],
+                    "Condition": {
+                        "StringEquals": {
+                            "iam:AWSServiceName": "lex.amazonaws.com"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "iam:CreateServiceLinkedRole"
+                    ],
+                    "Resource": [
+                        "arn:aws:iam::*:role/aws-service-role/channels.lex.amazonaws.com/AWSServiceRoleForLexChannels"
+                    ],
+                    "Condition": {
+                        "StringEquals": {
+                            "iam:AWSServiceName": "channels.lex.amazonaws.com"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "iam:CreateServiceLinkedRole"
+                    ],
+                    "Resource": [
+                        "arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*"
+                    ],
+                    "Condition": {
+                        "StringEquals": {
+                            "iam:AWSServiceName": "lexv2.amazonaws.com"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "iam:CreateServiceLinkedRole"
+                    ],
+                    "Resource": [
+                        "arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*"
+                    ],
+                    "Condition": {
+                        "StringEquals": {
+                            "iam:AWSServiceName": "channels.lexv2.amazonaws.com"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "iam:DeleteServiceLinkedRole",
+                        "iam:GetServiceLinkedRoleDeletionStatus"
+                    ],
+                    "Resource": [
+                        "arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots",
+                        "arn:aws:iam::*:role/aws-service-role/channels.lex.amazonaws.com/AWSServiceRoleForLexChannels",
+                        "arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*",
+                        "arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*"
+                    ]
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "iam:PassRole"
+                    ],
+                    "Resource": [
+                        "arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots"
+                    ],
+                    "Condition": {
+                        "StringEquals": {
+                            "iam:PassedToService": [
+                                "lex.amazonaws.com"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "iam:PassRole"
+                    ],
+                    "Resource": [
+                        "arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*"
+                    ],
+                    "Condition": {
+                        "StringEquals": {
+                            "iam:PassedToService": [
+                                "lexv2.amazonaws.com"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "iam:PassRole"
+                    ],
+                    "Resource": [
+                        "arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*"
+                    ],
+                    "Condition": {
+                        "StringEquals": {
+                            "iam:PassedToService": [
+                                "channels.lexv2.amazonaws.com"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "es:*"
+                    ],
+                    "Resource": "*"
+                }
+            ]
+        } ]
+        
+
   searchphotos:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -85,7 +313,8 @@ Resources:
       Description: 'search photos'
       MemorySize: 128
       Timeout: 3
-      Role: 'arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x'
+      # Role: 'arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x'
+      Role: !Ref searchphotosRole
       Events:
         ApiTrigger:
           Type: Api
@@ -101,9 +330,7 @@ Resources:
       Action: lambda:InvokeFunction
       Principal: 
         - apigateway.amazonaws.com
-        - apigateway.amazonaws.com
         - lex.amazonaws.com
-
 
 Outputs: 
   StackS3Photos: 
