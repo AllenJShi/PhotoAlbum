@@ -120,7 +120,7 @@ function previewFile(input) {
 
         var params = {
             "item": name,
-            "folder": "photos-2402",
+            "folder": "js-stack-s3photos-oflabtdu5arz",
             "Content-Type": type + ";base64",
             "x-amz-meta-customLabels": customLabels,
         };
