@@ -93,11 +93,7 @@ Resources:
     Properties:
       FunctionName: !GetAtt searchphotos.Arn
       Action: lambda:InvokeFunction
-      Principal: 
-        Service:
-          - apigateway.amazonaws.com
-          - lex.amazonaws.com
-      SourceAccount: !Ref 'AWS::AccountId'
+      Principal: '*'
 
 
 
