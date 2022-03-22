@@ -64,7 +64,6 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !GetAtt indexphotos.Arn
-      Effect: Allow
       Action: lambda:InvokeFunction
       Principal: s3.amazonaws.com
       SourceAccount: !Ref 'AWS::AccountId'
@@ -93,7 +92,6 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !GetAtt searchphotos.Arn
-      Effect: Allow
       Action: lambda:InvokeFunction
       Principal: 
         - apigateway.amazonaws.com
