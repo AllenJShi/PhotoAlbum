@@ -53,7 +53,7 @@ apigClientFactory.newClient = function (config) {
 
     
     // extract endpoint and path from url
-    var invokeUrl = 'https://cea9x9qer7.execute-api.us-east-1.amazonaws.com/test';
+    var invokeUrl = 'https://8r3vlniftb.execute-api.us-east-1.amazonaws.com/test';
     
     var endpoint = /(^https?:\/\/[^\/]+)/g.exec(invokeUrl)[1];
     var pathComponent = invokeUrl.substring(endpoint.length);
@@ -133,8 +133,14 @@ apigClientFactory.newClient = function (config) {
             body: body
         };
         
-        
-        return apiGatewayClient.makeRequest(uploadFolderItemPutRequest, authType, additionalParams, config.apiKey);
+        console.log("actual request starts ...")
+        return apiGatewayClient.makeRequest(uploadFolderItemPutRequest, authType, additionalParams, config.apiKey).then(function(result){
+                console.log("actual request response:",result);
+                console.log('actual request alert: success OK');
+                document.getElementById("success_msg").innerHTML = "Successfully Uploaded"
+            }).catch(function(result) {
+                console.log("catch request result:",result);
+            });
     };
     
     
@@ -150,7 +156,6 @@ apigClientFactory.newClient = function (config) {
             queryParams: apiGateway.core.utils.parseParametersToObject(params, []),
             body: body
         };
-        
         
         return apiGatewayClient.makeRequest(uploadFolderItemOptionsRequest, authType, additionalParams, config.apiKey);
     };

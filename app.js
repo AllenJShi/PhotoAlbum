@@ -35,6 +35,7 @@ function search() {
             console.log('OK');
             console.log(result)
             showImages(result.data);
+            document.getElementById("searchbar").value = ""
         }).catch(function(result) {
             console.log("Not OK");
         });
@@ -58,8 +59,10 @@ function showImages(res) {
             console.log(res[i]);
             var newDiv = document.getElementById("images");
             var newimg = document.createElement("img");
+            newimg.classList.add('col-md-3');
+            newimg.classList.add('img-fluid');
             newimg.src = res[i].url;
-            newDiv.appendChild(newimg);
+            newDiv.append(newimg);
         }
     }
 
@@ -105,8 +108,8 @@ function previewFile(input) {
         var newImage = document.createElement("img");
         newImage.src = src;
         encoded = newImage.outerHTML;
-        console.log(encoded);
-        showImages(input.files[0]);
+        // console.log(encoded);
+        // showImages(input.files[0]);
         last_index_quote = encoded.lastIndexOf('"');
         if (fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'png') {
             encodedStr = encoded.substring(33, last_index_quote);
@@ -135,12 +138,14 @@ function previewFile(input) {
         // console.log(blobObj);
         // console.log(encodedStr);
 
+        console.log("start making PUT ...")
         apigClient.uploadFolderItemPut(params, encodedStr, additionalParams)
             .then(function(result) {
-                console.log('success OK');
+                console.log('PUT alert: success OK');
                 document.getElementById("success_msg").innerHTML = "Successfully Uploaded"
+                document.getElementById("searchbar").value = ""
             }).catch(function(result) {
-                console.log(result);
+                console.log("catch PUT result: ",result);
             });
     }
 
