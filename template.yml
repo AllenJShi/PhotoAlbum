@@ -82,8 +82,8 @@ Resources:
             }]
         }
       Policies:
-        PolicyName: search-photo-role-cf
-        PolicyDocument: |
+        - PolicyName: search-photo-role-cf
+          PolicyDocument: |
             {
                 "Version": "2012-10-17",
                 "Statement": [
