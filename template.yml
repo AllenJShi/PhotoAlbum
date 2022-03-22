@@ -85,7 +85,7 @@ Resources:
                 "Action": [ "sts:AssumeRole" ]
             }]
         }
-      Policies: !Sub |
+      Policies: |
         [ {
             "Version": "2012-10-17",
             "Statement": [
@@ -101,7 +101,7 @@ Resources:
                         "logs:PutLogEvents"
                     ],
                     "Resource": [
-                        "arn:aws:logs:us-east-1:240279741812:log-group:/aws/lambda/${searchphotos.Arn}:*"
+                        "arn:aws:logs:us-east-1:240279741812:log-group:/aws/lambda/search-photos-cf:*"
                     ]
                 }
             ]
@@ -314,7 +314,7 @@ Resources:
       MemorySize: 128
       Timeout: 3
       # Role: 'arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x'
-      Role: !Ref searchphotosRole
+      RoleArn: !GetAtt searchphotosRole.Arn
       Events:
         ApiTrigger:
           Type: Api
