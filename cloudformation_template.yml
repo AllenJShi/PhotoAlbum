@@ -10,7 +10,7 @@ Parameters:
 
   S3GHToken:
     Type: String
-    Default: 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
+    Default: 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
 
   S3GHUser:
     Type: String
@@ -26,7 +26,7 @@ Parameters:
 
   LFGHToken:
     Type: String
-    Default: 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
+    Default: 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
 
   LFGHUser:
     Type: String
@@ -60,92 +60,84 @@ Resources:
                 Action: "*"
                 Resource: "*"
 
-  S3Photos:
-    Type: "AWS::S3::Bucket"
-    # Name: photos-cloudformation
-    Properties: 
-      AccessControl: PublicRead
-      CorsConfiguration:
-        CorsRules:
-          -
-            AllowedOrigins: 
-              - "*"
-            AllowedMethods: 
-              - POST
-              - GET
-              - PUT
-              - DELETE
-              - HEAD
-            AllowedHeaders: 
-              - "*"
+  # S3Photos:
+  #   Type: "AWS::S3::Bucket"
+  #   Properties: 
+  #     AccessControl: PublicRead
+  #     CorsConfiguration:
+  #       CorsRules:
+  #         -
+  #           AllowedOrigins: 
+  #             - "*"
+  #           AllowedMethods: 
+  #             - POST
+  #             - GET
+  #             - PUT
+  #             - DELETE
+  #             - HEAD
+  #           AllowedHeaders: 
+  #             - "*"
 
-  S3PhotosBucketPolicy:
-    Type: AWS::S3::BucketPolicy
+  # S3PhotosBucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   Properties:
+  #   # NOTE: create role, not sure if it works, this expect to allow the s3 bucket trigger index lambda lf1
+  #     RoleArn: !GetAtt AdminRole.Arn
+  #     Bucket: !Ref S3Photos
+  #     PolicyDocument:
+  #       Id: PublicWebsitePolicy
+  #       Version: 2012-10-17
+  #       Statement:
+  #         - Sid: S3PhotosBucketPolicy
+  #           Action: 's3:*'
+  #           Effect: Allow
+  #           Resource: !Join
+  #             - ''
+  #             - - 'arn:aws:s3:::'
+  #               - !Ref S3Photos
+  #               - /*
+  #           Principal: '*'
+
+  S3Pipeline:
+    Type: "AWS::CodePipeline::Pipeline"
     Properties:
-      Bucket: !Ref S3Photos
-      PolicyDocument:
-        Id: PublicWebsitePolicy
-        Version: 2012-10-17
-        Statement:
-          - Sid: S3PhotosBucketPolicy
-            Action: 's3:*'
-            Effect: Allow
-            # Resource:
-            #   - !Sub arn:aws:s3:::${S3Photos}
-            #   - !Sub arn:aws:s3:::${S3Photos}/*
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref S3Photos
-                - /*
-            Principal: '*'
-
-  S3Frontend:
-    Type: "AWS::S3::Bucket"
-    # Name: front-end-b1-cloudformation
-    Properties: 
-      AccessControl: PublicRead
-      WebsiteConfiguration:
-        IndexDocument: index.html
-      CorsConfiguration:
-        CorsRules:
-          -
-            AllowedOrigins: 
-              - "*"
-            AllowedMethods: 
-              - POST
-              - GET
-              - PUT
-              - DELETE
-              - HEAD
-            AllowedHeaders: 
-              - "*"
-            # ExposeHeaders: 
-            #   - "Access-Control-Allow-Origin"
-            #   - "x-amz-meta-customLabels"
-      # VersioningConfiguration: 
-      #   Status: Enabled
-
-  S3FrontendBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref S3Frontend
-      PolicyDocument:
-        Id: PublicWebsitePolicy
-        Version: 2012-10-17
-        Statement:
-          - Sid: S3FrontendBucketPolicy
-            Action: 's3:*'
-            Effect: Allow
-            # Resource:
-            #   - !Sub arn:aws:s3:::${S3Frontend}
-            #   - !Sub arn:aws:s3:::${S3Frontend}/*
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref S3Frontend
-                - /*
-            Principal: '*'
+      RoleArn: !GetAtt AdminRole.Arn
+      ArtifactStore:
+        Type: S3
+        # Location: !Ref S3Photos
+        Location: cf-templates-1tg60j4bhe7g6-us-east-1
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              Configuration:
+                Repo: !Ref S3GHRepo
+                Owner: !Ref S3GHUser
+                Branch: !Ref S3GHBranch
+                OAuthToken: !Ref S3GHToken
+                PollForSourceChanges: "true"
+              OutputArtifacts:
+                - Name: SourceArtifact
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: S3
+              Configuration:
+                BucketName: !Ref S3Frontend
+                Extract: true
+              InputArtifacts:
+                - Name: SourceArtifact
+              RunOrder: 1
 
 
   LFPipeline:
@@ -154,7 +146,8 @@ Resources:
       RoleArn: !GetAtt AdminRole.Arn
       ArtifactStore:
         Type: S3
-        Location: !Ref S3Photos
+        # Location: !Ref S3Photos
+        Location: cf-templates-1tg60j4bhe7g6-us-east-1
       Stages:
         - Name: Source
           Actions:
@@ -235,45 +228,6 @@ Resources:
             #   Namespace: ExecuteVariables
 
 
-  S3Pipeline:
-    Type: "AWS::CodePipeline::Pipeline"
-    Properties:
-      RoleArn: !GetAtt AdminRole.Arn
-      ArtifactStore:
-        Type: S3
-        Location: !Ref S3Photos
-      Stages:
-        - Name: Source
-          Actions:
-            - Name: Source
-              ActionTypeId:
-                Category: Source
-                Owner: ThirdParty
-                Version: 1
-                Provider: GitHub
-              Configuration:
-                Repo: !Ref S3GHRepo
-                Owner: !Ref S3GHUser
-                Branch: !Ref S3GHBranch
-                OAuthToken: !Ref S3GHToken
-                PollForSourceChanges: "true"
-              OutputArtifacts:
-                - Name: SourceArtifact
-              RunOrder: 1
-        - Name: Deploy
-          Actions:
-            - Name: Deploy
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Version: 1
-                Provider: S3
-              Configuration:
-                BucketName: !Ref S3Frontend
-                Extract: true
-              InputArtifacts:
-                - Name: SourceArtifact
-              RunOrder: 1
 
 
   RestApi:
@@ -535,3 +489,4 @@ Resources:
   #       VolumeType: 'gp2'
 
 # Refer to https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-opensearchservice-domain.html
+

@@ -2,10 +2,43 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: SAM Lambda template 
 Resources:
-  photoBucket:
-    Type: AWS::S3::Bucket
+  S3Photos:
+    Type: "AWS::S3::Bucket"
+    Properties: 
+      AccessControl: PublicRead
+      CorsConfiguration:
+        CorsRules:
+          -
+            AllowedOrigins: 
+              - "*"
+            AllowedMethods: 
+              - POST
+              - GET
+              - PUT
+              - DELETE
+              - HEAD
+            AllowedHeaders: 
+              - "*"
+
+  S3PhotosBucketPolicy:
+    Type: AWS::S3::BucketPolicy
     Properties:
-      BucketName: photos-cf
+    # NOTE: create role, not sure if it works, this expect to allow the s3 bucket trigger index lambda lf1
+      RoleArn: !GetAtt AdminRole.Arn
+      Bucket: !Ref S3Photos
+      PolicyDocument:
+        Id: PublicWebsitePolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: S3PhotosBucketPolicy
+            Action: 's3:*'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref S3Photos
+                - /*
+            Principal: '*'
 
   indexphotos:
     Type: 'AWS::Serverless::Function'
@@ -25,11 +58,22 @@ Resources:
           Type: S3
           Properties:
             Bucket:
-              Ref: photoBucket
+              Ref: S3Photos
             Events:
               - 's3:ObjectCreated:Put'
       Tags:
         'lambda-console:blueprint': s3-get-object-python
+
+  indexphotosPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt indexphotos.Arn
+      Effect: Allow
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
+      SourceArn: !GetAtt S3Photos.Arn
+
 
   searchphotos:
     Type: 'AWS::Serverless::Function'
@@ -49,3 +93,21 @@ Resources:
             Path: /search
             Method: GET
 
+  searchphotosPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt searchphotos.Arn
+      Effect: Allow
+      Action: lambda:InvokeFunction
+      Principal: 
+        - apigateway.amazonaws.com
+        - apigateway.amazonaws.com
+        - lex.amazonaws.com
+
+
+Outputs: 
+  StackS3Photos: 
+    Description: export s3 photos
+    Value: !Ref S3Photos 
+    Export: 
+     Name: !Sub S3Photos.Arn
