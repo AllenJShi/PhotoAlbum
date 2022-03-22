@@ -331,10 +331,3 @@ Resources:
       Principal: 
         - apigateway.amazonaws.com
         - lex.amazonaws.com
-
-Outputs: 
-  StackS3Photos: 
-    Description: export s3 photos
-    Value: !Ref S3Photos 
-    Export: 
-     Name: !Sub S3Photos.Arn
