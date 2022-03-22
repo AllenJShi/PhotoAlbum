@@ -314,7 +314,7 @@ Resources:
       MemorySize: 128
       Timeout: 3
       # Role: 'arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x'
-      Role: !GetAtt searchphotosRole
+      Role: !Ref searchphotosRole
       Events:
         ApiTrigger:
           Type: Api
