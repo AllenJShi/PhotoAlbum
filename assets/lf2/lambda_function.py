@@ -1,10 +1,9 @@
 import json
-import urllib.parse
 import boto3
-from botocore.client import Config
 from opensearchpy import OpenSearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
-import requests
+import inflect
+
 
 ELASTIC_SEARCH_DOMAIN = 'search-photos1-4zwpjzi4fpqscem2wwpllgvl3a.us-east-1.es.amazonaws.com'
 PORT = 443  # HTTPS request
@@ -16,7 +15,7 @@ credentials = session.get_credentials()
 awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, REGION, 'es', session_token=credentials.token)
 
 def lambda_handler(event, context):
-
+    p = inflect.engine()
     query = event['queryStringParameters']['q']
     print('query:', query)
     lex = boto3.client('lex-runtime')
@@ -36,7 +35,7 @@ def lambda_handler(event, context):
     labels = []            
     for _, val in response['slots'].items():
         if val is not None:
-            labels.append(val)
+            labels.append(p.singular_noun(val) if p.singular_noun(val) else val)
     print("labels (slots): ", labels)
 
     photos = es_service(labels)
