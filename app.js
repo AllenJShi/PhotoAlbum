@@ -65,21 +65,6 @@ function showImages(res) {
             newDiv.append(newimg);
         }
     }
-
-
-    // console.log(res.Responses.length);
-    // if (res.Responses.length == 0) {
-    //     var newContent = document.createTextNode("No image to display");
-    //     newDiv.appendChild(newContent);
-    // } else {
-    //     for (var i = 0; i < res.Responses.length; i++) {
-    //         console.log(res.Responses[i]);
-    //         var newDiv = document.getElementById("images");
-    //         var newimg = document.createElement("img");
-    //         newimg.src = res.Responses[i].url;
-    //         newDiv.appendChild(newimg);
-    //     }
-    // }
 }
 
 const realFileBtn = document.getElementById("realfile");
@@ -108,8 +93,7 @@ function previewFile(input) {
         var newImage = document.createElement("img");
         newImage.src = src;
         encoded = newImage.outerHTML;
-        // console.log(encoded);
-        // showImages(input.files[0]);
+
         last_index_quote = encoded.lastIndexOf('"');
         if (fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'png') {
             encodedStr = encoded.substring(33, last_index_quote);
@@ -120,7 +104,7 @@ function previewFile(input) {
 
         var params = {
             "item": name,
-            "folder": "js-stack-s3photos-1hht3vz11wa94",
+            "folder": "photos-2402",
             "Content-Type": type + ";base64",
             "x-amz-meta-customLabels": customLabels,
         };
@@ -131,12 +115,6 @@ function previewFile(input) {
                 "x-amz-meta-customLabels": customLabels
             }
         };
-        // console.log(encodedStr);
-
-        // refer to https://stackoverflow.com/questions/65346277/createobjecturl-overload-resolution-failed
-        // var blobObj = new Blob([atob(encodedStr)], { type: "image/jpg" });
-        // console.log(blobObj);
-        // console.log(encodedStr);
 
         console.log("start making PUT ...")
         apigClient.uploadFolderItemPut(params, encodedStr, additionalParams)
@@ -151,17 +129,3 @@ function previewFile(input) {
 
     reader.readAsDataURL(input.files[0]);
 }
-
-// window.URL = window.URL || window.webkitURL;
-
-// function importFileandPreview() {
-//   var preview = document.querySelector('img');
-//   var file    = document.querySelector('input[type=file]').files[0];
-
-//   preview.src = window.URL.createObjectURL(file);
-//   preview.onload = function() {
-//     window.URL.revokeObjectURL(this.src);
-//   }
-  
-//   document.getElementById("srcAttribute").innerHTML = "<b>src attribute:</b> " + preview.src;  
-// }
