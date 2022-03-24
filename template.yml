@@ -48,11 +48,10 @@ Resources:
                 - /*
             Principal: '*'
 
-
-  indexphotosRole:
+  LambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${indexphotosName}-role
+      RoleName: lambda-role
       AssumeRolePolicyDocument: |
         {
             "Version": "2012-10-17",
@@ -63,7 +62,7 @@ Resources:
             }]
         }
       Policies:
-        - PolicyName: !Sub ${indexphotosName}-role-basic-policy
+        - PolicyName: lambda-role-basic-policy
           PolicyDocument: !Sub |
             {
                 "Version": "2012-10-17",
@@ -80,31 +79,78 @@ Resources:
                             "logs:PutLogEvents"
                         ],
                         "Resource": [
-                            "arn:aws:logs:us-east-1:240279741812:log-group:/aws/lambda/${indexphotosName}:*"
+                            "arn:aws:logs:us-east-1:240279741812:log-group:/aws/lambda/${indexphotosName}:*",
+                            "arn:aws:logs:us-east-1:240279741812:log-group:/aws/lambda/${searchphotosName}:*"
                         ]
-                    }
-                ]
-            }
-        - PolicyName: !Sub ${indexphotosName}-role-s3-policy
-          PolicyDocument: |
-            {
-                "Version": "2012-10-17",
-                "Statement": [
-                    {
-                        "Effect": "Allow",
-                        "Action": [
-                            "s3:GetObject"
-                        ],
-                        "Resource": "arn:aws:s3:::*"
                     }
                 ]
             }
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonRekognitionFullAccess
-        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         - arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess
         - arn:aws:iam::aws:policy/service-role/AmazonS3ObjectLambdaExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonLexFullAccess
+
+
+
+  # indexphotosRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Sub ${indexphotosName}-role
+  #     AssumeRolePolicyDocument: |
+  #       {
+  #           "Version": "2012-10-17",
+  #           "Statement": [{
+  #               "Effect": "Allow",
+  #               "Principal": { "Service": [ "lambda.amazonaws.com","codebuild.amazonaws.com", "cloudformation.amazonaws.com", "codepipeline.amazonaws.com" ]},
+  #               "Action": [ "sts:AssumeRole" ]
+  #           }]
+  #       }
+  #     Policies:
+  #       - PolicyName: !Sub ${indexphotosName}-role-basic-policy
+  #         PolicyDocument: !Sub |
+  #           {
+  #               "Version": "2012-10-17",
+  #               "Statement": [
+  #                   {
+  #                       "Effect": "Allow",
+  #                       "Action": "logs:CreateLogGroup",
+  #                       "Resource": "arn:aws:logs:us-east-1:240279741812:*"
+  #                   },
+  #                   {
+  #                       "Effect": "Allow",
+  #                       "Action": [
+  #                           "logs:CreateLogStream",
+  #                           "logs:PutLogEvents"
+  #                       ],
+  #                       "Resource": [
+  #                           "arn:aws:logs:us-east-1:240279741812:log-group:/aws/lambda/${indexphotosName}:*"
+  #                       ]
+  #                   }
+  #               ]
+  #           }
+  #       - PolicyName: !Sub ${indexphotosName}-role-s3-policy
+  #         PolicyDocument: |
+  #           {
+  #               "Version": "2012-10-17",
+  #               "Statement": [
+  #                   {
+  #                       "Effect": "Allow",
+  #                       "Action": [
+  #                           "s3:GetObject"
+  #                       ],
+  #                       "Resource": "arn:aws:s3:::*"
+  #                   }
+  #               ]
+  #           }
+  #     ManagedPolicyArns:
+  #       - arn:aws:iam::aws:policy/AmazonRekognitionFullAccess
+  #       - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+  #       - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+  #       - arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess
+  #       - arn:aws:iam::aws:policy/service-role/AmazonS3ObjectLambdaExecutionRolePolicy
 
 
   indexphotos:
@@ -141,46 +187,46 @@ Resources:
   
 
 
-  searchphotosRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub ${searchphotosName}-role
-      AssumeRolePolicyDocument: |
-        {
-            "Version": "2012-10-17",
-            "Statement": [{
-                "Effect": "Allow",
-                "Principal": { "Service": ["lambda.amazonaws.com", "codebuild.amazonaws.com", "cloudformation.amazonaws.com", "codepipeline.amazonaws.com" ]},
-                "Action": [ "sts:AssumeRole" ]
-            }]
-        }
-      Policies:
-        - PolicyName: !Sub ${searchphotosName}-role-basic-policy
-          PolicyDocument: !Sub |
-            {
-                "Version": "2012-10-17",
-                "Statement": [
-                    {
-                        "Effect": "Allow",
-                        "Action": "logs:CreateLogGroup",
-                        "Resource": "arn:aws:logs:us-east-1:240279741812:*"
-                    },
-                    {
-                        "Effect": "Allow",
-                        "Action": [
-                            "logs:CreateLogStream",
-                            "logs:PutLogEvents"
-                        ],
-                        "Resource": [
-                            "arn:aws:logs:us-east-1:240279741812:log-group:/aws/lambda/${searchphotosName}:*"
-                        ]
-                    }
-                ]
-            }
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
-        - arn:aws:iam::aws:policy/AmazonLexFullAccess
-        - arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess
+  # searchphotosRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Sub ${searchphotosName}-role
+  #     AssumeRolePolicyDocument: |
+  #       {
+  #           "Version": "2012-10-17",
+  #           "Statement": [{
+  #               "Effect": "Allow",
+  #               "Principal": { "Service": ["lambda.amazonaws.com", "codebuild.amazonaws.com", "cloudformation.amazonaws.com", "codepipeline.amazonaws.com" ]},
+  #               "Action": [ "sts:AssumeRole" ]
+  #           }]
+  #       }
+  #     Policies:
+  #       - PolicyName: !Sub ${searchphotosName}-role-basic-policy
+  #         PolicyDocument: !Sub |
+  #           {
+  #               "Version": "2012-10-17",
+  #               "Statement": [
+  #                   {
+  #                       "Effect": "Allow",
+  #                       "Action": "logs:CreateLogGroup",
+  #                       "Resource": "arn:aws:logs:us-east-1:240279741812:*"
+  #                   },
+  #                   {
+  #                       "Effect": "Allow",
+  #                       "Action": [
+  #                           "logs:CreateLogStream",
+  #                           "logs:PutLogEvents"
+  #                       ],
+  #                       "Resource": [
+  #                           "arn:aws:logs:us-east-1:240279741812:log-group:/aws/lambda/${searchphotosName}:*"
+  #                       ]
+  #                   }
+  #               ]
+  #           }
+  #     ManagedPolicyArns:
+  #       - arn:aws:iam::aws:policy/AmazonS3FullAccess
+  #       - arn:aws:iam::aws:policy/AmazonLexFullAccess
+  #       - arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess
 
 
   searchphotos:
