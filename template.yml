@@ -119,8 +119,8 @@ Resources:
         been updated.
       MemorySize: 128
       Timeout: 3
-      # Role: 'arn:aws:iam::240279741812:role/service-role/LF1-index-photos'
-      Role: !GetAtt 'indexphotosRole.Arn'
+      Role: 'arn:aws:iam::240279741812:role/service-role/LF1-index-photos'
+      # Role: !GetAtt 'indexphotosRole.Arn'
       Events:
         S3Trigger:
           Type: S3
@@ -193,8 +193,8 @@ Resources:
       Description: 'search photos'
       MemorySize: 128
       Timeout: 3
-      # Role: 'arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x'
-      Role: !GetAtt 'searchphotosRole.Arn'
+      Role: 'arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x'
+      # Role: !GetAtt 'searchphotosRole.Arn'
       Events:
         ApiTrigger:
           Type: Api
