@@ -469,7 +469,7 @@ Resources:
         InternalUserDatabaseEnabled: false
         MasterUserOptions:
           # MasterUserARN: "arn:aws:iam::240279741812:role/service-role/LF1-index-photos,arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x"
-          MasterUserARN: !Sub "arn:aws:iam::240279741812:role/service-role/${indexphotosRoleName},arn:aws:iam::240279741812:role/service-role/${searchphotosRoleName},arn:aws:iam::240279741812:role/service-role/LF1-index-photos,arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x"
+          MasterUserARN: !Sub "arn:aws:iam::240279741812:role/service-role/${indexphotosRoleName},arn:aws:iam::240279741812:role/service-role/${searchphotosRoleName}"
       NodeToNodeEncryptionOptions: 
         Enabled: true
       DomainEndpointOptions:
