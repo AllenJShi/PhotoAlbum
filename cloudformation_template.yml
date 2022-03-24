@@ -40,6 +40,14 @@ Parameters:
     Type: String
     Default: search-photos-cf
 
+  indexphotosName:
+    Type: String
+    Default: index-photos-cf
+  
+  templateArtifactBucketName:
+    Type: String
+    Default: cf-templates-1tg60j4bhe7g6-us-east-1
+
 Resources:
   AdminRole:
     Type: "AWS::IAM::Role"
@@ -65,43 +73,6 @@ Resources:
                 Action: "*"
                 Resource: "*"
 
-  # S3Photos:
-  #   Type: "AWS::S3::Bucket"
-  #   Properties: 
-  #     AccessControl: PublicRead
-  #     CorsConfiguration:
-  #       CorsRules:
-  #         -
-  #           AllowedOrigins: 
-  #             - "*"
-  #           AllowedMethods: 
-  #             - POST
-  #             - GET
-  #             - PUT
-  #             - DELETE
-  #             - HEAD
-  #           AllowedHeaders: 
-  #             - "*"
-
-  # S3PhotosBucketPolicy:
-  #   Type: AWS::S3::BucketPolicy
-  #   Properties:
-  #   # NOTE: create role, not sure if it works, this expect to allow the s3 bucket trigger index lambda lf1
-  #     RoleArn: !GetAtt AdminRole.Arn
-  #     Bucket: !Ref S3Photos
-  #     PolicyDocument:
-  #       Id: PublicWebsitePolicy
-  #       Version: 2012-10-17
-  #       Statement:
-  #         - Sid: S3PhotosBucketPolicy
-  #           Action: 's3:*'
-  #           Effect: Allow
-  #           Resource: !Join
-  #             - ''
-  #             - - 'arn:aws:s3:::'
-  #               - !Ref S3Photos
-  #               - /*
-  #           Principal: '*'
 
   S3Frontend:
     Type: "AWS::S3::Bucket"
@@ -122,11 +93,7 @@ Resources:
               - HEAD
             AllowedHeaders: 
               - "*"
-            # ExposeHeaders: 
-            #   - "Access-Control-Allow-Origin"
-            #   - "x-amz-meta-customLabels"
-      # VersioningConfiguration: 
-      #   Status: Enabled
+
 
   S3FrontendBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -139,9 +106,6 @@ Resources:
           - Sid: S3FrontendBucketPolicy
             Action: 's3:*'
             Effect: Allow
-            # Resource:
-            #   - !Sub arn:aws:s3:::${S3Frontend}
-            #   - !Sub arn:aws:s3:::${S3Frontend}/*
             Resource: !Join
               - ''
               - - 'arn:aws:s3:::'
@@ -156,8 +120,7 @@ Resources:
       RoleArn: !GetAtt AdminRole.Arn
       ArtifactStore:
         Type: S3
-        # Location: !Ref S3Photos
-        Location: cf-templates-1tg60j4bhe7g6-us-east-1
+        Location: !Ref templateArtifactBucketName
       Stages:
         - Name: Source
           Actions:
@@ -198,8 +161,7 @@ Resources:
       RoleArn: !GetAtt AdminRole.Arn
       ArtifactStore:
         Type: S3
-        # Location: !Ref S3Photos
-        Location: cf-templates-1tg60j4bhe7g6-us-east-1
+        Location: !Ref templateArtifactBucketName
       Stages:
         - Name: Source
           Actions:
@@ -248,10 +210,8 @@ Resources:
                 Version: "1"
               RunOrder: 1
               Configuration:
-                # ActionMode: CHANGE_SET_REPLACE
                 ActionMode: CREATE_UPDATE
                 Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
-                # ChangeSetName: "js-ChangeSet"
                 RoleArn: !GetAtt AdminRole.Arn
                 StackName: "js-stack"
                 TemplatePath: BuildArtifact::packaged-template.yml
@@ -260,24 +220,6 @@ Resources:
                 - Name: BuildArtifact
               Region: us-east-1
               Namespace: DeployVariables
-
-            # - Name: Execute
-            #   ActionTypeId:
-            #     Category: Deploy
-            #     Owner: AWS
-            #     Provider: CloudFormation
-            #     Version: "1"
-            #   RunOrder: 1
-            #   Configuration:
-            #     ActionMode: CHANGE_SET_EXECUTE
-            #     Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND
-            #     ChangeSetName: "js-ChangeSet"
-            #     RoleArn: !GetAtt AdminRole.Arn
-            #     StackName: "js-stack"
-            #   OutputArtifacts: []
-            #   InputArtifacts: []
-            #   Region: us-east-1
-            #   Namespace: ExecuteVariables
 
 
   RestApi:
@@ -508,41 +450,42 @@ Resources:
       - RestApiDeployment
       - RestApi
 
-  # OpenSearchServiceDomain:
-  #   Type: AWS::OpenSearchService::Domain
-  #   Properties: 
-  #     DomainName:
-  #       Ref: OpenSearchDomain
-  #     EngineVersion: 'OpenSearch_1.0'
-  #     AdvancedSecurityOptions:
-  #       Enabled: true
-  #       InternalUserDatabaseEnabled: false
-  #       MasterUserOptions:
-  #         MasterUserARN: "arn:aws:iam::240279741812:role/service-role/LF1-index-photos,arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x"
-  #     NodeToNodeEncryptionOptions: 
-  #       Enabled: true
-  #     DomainEndpointOptions:
-  #       EnforceHTTPS: true
-  #     EncryptionAtRestOptions:
-  #       Enabled: true
-  #       KmsKeyId: 59a25232-9969-4e31-b7c6-ab80147e51ca
-  #     AccessPolicies: 
-  #       Version: '2012-10-17'
-  #       Statement:
-  #         - Effect: 'Allow'
-  #           Principal: '*'
-  #           Action: 'es:*'
-  #           Resource: !Sub 'arn:aws:es:us-east-1:240279741812:domain/${OpenSearchDomain}/*'
-  #     ClusterConfig: 
-  #       DedicatedMasterEnabled: false
-  #       InstanceCount: '1'
-  #       ZoneAwarenessEnabled: false
-  #       InstanceType: 't3.small.search'
-  #     EBSOptions:
-  #       EBSEnabled: true
-  #       Iops: '0'
-  #       VolumeSize: '10'
-  #       VolumeType: 'gp2'
+  OpenSearchServiceDomain:
+    Type: AWS::OpenSearchService::Domain
+    Properties: 
+      DomainName:
+        Ref: OpenSearchDomain
+      EngineVersion: 'OpenSearch_1.0'
+      AdvancedSecurityOptions:
+        Enabled: true
+        InternalUserDatabaseEnabled: false
+        MasterUserOptions:
+          # MasterUserARN: "arn:aws:iam::240279741812:role/service-role/LF1-index-photos,arn:aws:iam::240279741812:role/service-role/search-photos-role-fu63i46x"
+          MasterUserARN: !Sub "arn:aws:iam::240279741812:role/service-role/${indexphotosName},arn:aws:iam::240279741812:role/service-role/${searchphotosName}"
+      NodeToNodeEncryptionOptions: 
+        Enabled: true
+      DomainEndpointOptions:
+        EnforceHTTPS: true
+      EncryptionAtRestOptions:
+        Enabled: true
+        KmsKeyId: 59a25232-9969-4e31-b7c6-ab80147e51ca
+      AccessPolicies: 
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal: '*'
+            Action: 'es:*'
+            Resource: !Sub 'arn:aws:es:us-east-1:240279741812:domain/${OpenSearchDomain}/*'
+      ClusterConfig: 
+        DedicatedMasterEnabled: false
+        InstanceCount: '1'
+        ZoneAwarenessEnabled: false
+        InstanceType: 't3.small.search'
+      EBSOptions:
+        EBSEnabled: true
+        Iops: '0'
+        VolumeSize: '10'
+        VolumeType: 'gp2'
 
 # Refer to https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-opensearchservice-domain.html
 
