@@ -32,12 +32,12 @@ function search() {
     };
     apigClient.searchGet(params, body, additionalParams)
         .then(function(result) {
-            console.log('OK');
+            console.log('Succeeded');
             console.log(result)
             showImages(result.data);
             document.getElementById("searchbar").value = ""
         }).catch(function(result) {
-            console.log("Not OK");
+            console.log("Failed");
         });
 }
 

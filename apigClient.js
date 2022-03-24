@@ -133,14 +133,7 @@ apigClientFactory.newClient = function (config) {
             body: body
         };
         
-        console.log("actual request starts ...")
-        return apiGatewayClient.makeRequest(uploadFolderItemPutRequest, authType, additionalParams, config.apiKey).then(function(result){
-                console.log("actual request response:",result);
-                console.log('actual request alert: success OK');
-                document.getElementById("success_msg").innerHTML = "Successfully Uploaded"
-            }).catch(function(result) {
-                console.log("catch request result:",result);
-            });
+        return apiGatewayClient.makeRequest(uploadFolderItemPutRequest, authType, additionalParams, config.apiKey)
     };
     
     
