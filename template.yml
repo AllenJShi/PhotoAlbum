@@ -57,7 +57,7 @@ Resources:
         {
             "Statement": [{
                 "Effect": "Allow",
-                "Principal": { "Service": [ "codebuild.amazonaws.com", "cloudformation.amazonaws.com", "codepipeline.amazonaws.com" ]},
+                "Principal": { "Service": [ "lambda.amazonaws.com","codebuild.amazonaws.com", "cloudformation.amazonaws.com", "codepipeline.amazonaws.com" ]},
                 "Action": [ "sts:AssumeRole" ]
             }]
         }
@@ -148,7 +148,7 @@ Resources:
         {
             "Statement": [{
                 "Effect": "Allow",
-                "Principal": { "Service": [ "codebuild.amazonaws.com", "cloudformation.amazonaws.com", "codepipeline.amazonaws.com" ]},
+                "Principal": { "Service": ["lambda.amazonaws.com", "codebuild.amazonaws.com", "cloudformation.amazonaws.com", "codepipeline.amazonaws.com" ]},
                 "Action": [ "sts:AssumeRole" ]
             }]
         }
