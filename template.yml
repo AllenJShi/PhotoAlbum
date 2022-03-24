@@ -107,7 +107,7 @@ Resources:
 
 
   indexphotos:
-    Type: 'AWS::Lambda::Function'
+    Type: 'AWS::Serverless::Function'
     Properties:
       FunctionName: !Ref indexphotosName
       Handler: lambda_function.lambda_handler
@@ -182,7 +182,7 @@ Resources:
 
 
   searchphotos:
-    Type: 'AWS::Lambda::Function'
+    Type: 'AWS::Serverless::Function'
     Properties:
       FunctionName: !Ref searchphotosName
       Handler: lambda_function.lambda_handler
