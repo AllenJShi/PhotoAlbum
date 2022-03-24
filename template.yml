@@ -55,6 +55,7 @@ Resources:
       RoleName: !Sub ${indexphotosName}-role
       AssumeRolePolicyDocument: |
         {
+            "Version": "2012-10-17",
             "Statement": [{
                 "Effect": "Allow",
                 "Principal": { "Service": [ "lambda.amazonaws.com","codebuild.amazonaws.com", "cloudformation.amazonaws.com", "codepipeline.amazonaws.com" ]},
@@ -146,6 +147,7 @@ Resources:
       RoleName: !Sub ${searchphotosName}-role
       AssumeRolePolicyDocument: |
         {
+            "Version": "2012-10-17",
             "Statement": [{
                 "Effect": "Allow",
                 "Principal": { "Service": ["lambda.amazonaws.com", "codebuild.amazonaws.com", "cloudformation.amazonaws.com", "codepipeline.amazonaws.com" ]},
