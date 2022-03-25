@@ -36,6 +36,7 @@ function search() {
             console.log(result)
             showImages(result.data);
             document.getElementById("searchbar").value = ""
+            document.getElementById("success_msg").innerHTML = ""
         }).catch(function(result) {
             console.log("Failed");
         });
