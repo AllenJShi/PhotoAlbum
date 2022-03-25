@@ -11,6 +11,10 @@ Parameters:
     Type: String
     Default: index-photos-cf
 
+  LambdaRoleName:
+    Type: String
+    Default: lambda-role
+
 Resources:
   S3Photos:
     Type: "AWS::S3::Bucket"
@@ -51,7 +55,7 @@ Resources:
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: lambda-role
+      RoleName: !Ref LambdaRoleName
       AssumeRolePolicyDocument: |
         {
             "Version": "2012-10-17",
