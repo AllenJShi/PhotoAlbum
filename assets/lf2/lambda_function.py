@@ -5,7 +5,8 @@ from requests_aws4auth import AWS4Auth
 import inflect
 
 
-ELASTIC_SEARCH_DOMAIN = 'search-photos1-4zwpjzi4fpqscem2wwpllgvl3a.us-east-1.es.amazonaws.com'
+# ELASTIC_SEARCH_DOMAIN = 'search-photos1-4zwpjzi4fpqscem2wwpllgvl3a.us-east-1.es.amazonaws.com'
+ELASTIC_SEARCH_DOMAIN = 'search-photos-cf-sxqeolifvhmlhxrv4khk37ep6e.us-east-1.es.amazonaws.com'
 PORT = 443  # HTTPS request
 INDEX = 'photos'
 REGION = 'us-east-1'
