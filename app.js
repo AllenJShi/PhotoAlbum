@@ -16,7 +16,9 @@ function searchFromVoice() {
 
 function search() {
     var searchTerm = document.getElementById("searchbar").value;
-    var apigClient = apigClientFactory.newClient();
+    var apigClient = apigClientFactory.newClient({
+        apiKey:"c09rlFCpWx3zey9TGrwxH7KZ5cyVas7OxnywTlij"
+    });
 
     var params = {
         q: searchTerm
