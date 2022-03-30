@@ -7,7 +7,7 @@ print('Loading function LF1')
 
 s3 = boto3.client('s3')
 rekog = boto3.client('rekognition')
-
+# comment: test github action 
 # domain = 'search-photos1-4zwpjzi4fpqscem2wwpllgvl3a.us-east-1.es.amazonaws.com'
 domain = 'search-photos-cf-sxqeolifvhmlhxrv4khk37ep6e.us-east-1.es.amazonaws.com'
 region = 'us-east-1'
